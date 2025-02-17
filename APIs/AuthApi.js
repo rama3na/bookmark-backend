@@ -11,7 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "4f8fH7tJbC5zL9xK2G7fU6nR1vYdM9f3H6
 // ✅ User Registration (Signup)
 authApp.post('/register', expressAsyncHandler(async (req, res) => {
     const authCollectionObj = req.app.get("authCollectionObj");
-
+    console.log(authCollectionObj)
     if (!authCollectionObj) {
         console.error("❌ Database collection not initialized!");
         return res.status(500).json({ message: "Database not initialized yet." });
@@ -38,8 +38,8 @@ authApp.post('/register', expressAsyncHandler(async (req, res) => {
         res.json({ message: "User registered successfully" });
     } catch (error) {
         console.error("❌ Error during registration:", error);
-        return res.status(500).json({ message: "Internal server error" });
-    }
+        return res.status(500).json({ message: "Internal server error", error: error.message });
+    }    
 }));
 
 
