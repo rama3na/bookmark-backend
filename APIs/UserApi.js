@@ -5,9 +5,9 @@ const jwt = require("jsonwebtoken");
 const userApp = exp.Router();
 userApp.use(exp.json());
 
-// Middleware for Token Authentication
+ 
 const verifyToken = (req, res, next) => {
-    const token = req.headers.authorization?.split(" ")[1];  // Extract token from Authorization header
+    const token = req.headers.authorization?.split(" ")[1];   
     console.log("Token received:", token);
 
     if (!token) {
@@ -15,17 +15,17 @@ const verifyToken = (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);  // Verify token
-        req.user = decoded;  // Store user info in the request object
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);   
+        req.user = decoded;   
         next();
     } catch (error) {
         res.status(401).json({ message: "Invalid token" });
     }
 };
 
-// ✅ Add a New Bookmark
+
 userApp.post('/adduser', verifyToken, expressAsyncHandler(async (req, res) => {
-    const userCollectionObj = req.app.get("userCollectionObj");  // Fixed collection name
+    const userCollectionObj = req.app.get("userCollectionObj");   
     const { title, content } = req.body;
 
     if (!title || !content) {
@@ -38,7 +38,7 @@ userApp.post('/adduser', verifyToken, expressAsyncHandler(async (req, res) => {
     res.json({ message: "Bookmark added successfully" });
 }));
 
-// ✅ Get All Bookmarks (Only for Authenticated User)
+ 
 userApp.get('/get-bookmarks', verifyToken, expressAsyncHandler(async (req, res) => {
     const userCollectionObj = req.app.get("userCollectionObj");
 
@@ -46,7 +46,7 @@ userApp.get('/get-bookmarks', verifyToken, expressAsyncHandler(async (req, res) 
     res.json({ message: "Bookmarks retrieved", payload: bookmarks });
 }));
 
-// ✅ Update Bookmark
+ 
 userApp.put('/update-bookmark/:id', verifyToken, expressAsyncHandler(async (req, res) => {
     const bookmarkCollectionObj = req.app.get("userCollectionObj");
     const bookmarkId = req.params.id;
@@ -68,7 +68,7 @@ userApp.put('/update-bookmark/:id', verifyToken, expressAsyncHandler(async (req,
     }
 }));
 
-// ✅ Delete Bookmark
+ 
 userApp.delete('/delete-bookmark/:id', verifyToken, expressAsyncHandler(async (req, res) => {
     const bookmarkCollectionObj = req.app.get("userCollectionObj");
     const bookmarkId = req.params.id;
@@ -79,10 +79,10 @@ userApp.delete('/delete-bookmark/:id', verifyToken, expressAsyncHandler(async (r
 
     const result = await bookmarkCollectionObj.deleteOne({
         _id: new ObjectId(bookmarkId),
-        userId: req.user.email  // Ensure the user can only delete their own bookmarks
+        userId: req.user.email  
     });
 
-    console.log("Delete result:", result);  // Log the result for debugging
+    console.log("Delete result:", result);   
 
     if (result.deletedCount > 0) {
         res.json({ message: "Bookmark deleted successfully" });
