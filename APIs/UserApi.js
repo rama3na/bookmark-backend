@@ -8,6 +8,7 @@ userApp.use(exp.json());
 // Middleware for Token Authentication
 const verifyToken = (req, res, next) => {
     const token = req.headers.authorization?.split(" ")[1];
+    console.log("Token received:", token);
 
     if (!token) {
         return res.status(403).json({ message: "Access denied. No token provided." });
@@ -70,24 +71,26 @@ userApp.put('/update-bookmark/:id', verifyToken, expressAsyncHandler(async (req,
 
 // ✅ Delete Bookmark
 userApp.delete('/delete-bookmark/:id', verifyToken, expressAsyncHandler(async (req, res) => {
-    const bookmarkCollectionObj = req.app.get("userCollectionObj"); // ✅ Ensure correct collection
+    const bookmarkCollectionObj = req.app.get("userCollectionObj"); // Ensure correct collection
     const bookmarkId = req.params.id;
 
     if (!ObjectId.isValid(bookmarkId)) {
         return res.status(400).json({ message: "Invalid bookmark ID" });
     }
 
-    const result = await bookmarkCollectionObj.deleteOne({ 
-        _id: new ObjectId(bookmarkId), 
-        userId: req.user.email 
+    const result = await bookmarkCollectionObj.deleteOne({
+        _id: new ObjectId(bookmarkId),
+        userId: req.user.email  // Ensure the user can only delete their own bookmarks
     });
 
     if (result.deletedCount > 0) {
         res.json({ message: "Bookmark deleted successfully" });
     } else {
-        res.status(400).json({ message: "Bookmark deletion failed or unauthorized" });
+        // Changed 400 to 403 for unauthorized deletion attempts
+        res.status(403).json({ message: "Forbidden: You can only delete your own bookmarks" });
     }
 }));
+
 
 
 module.exports = userApp;
