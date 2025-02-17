@@ -11,9 +11,8 @@ app.use(
   cors({
     origin: [
       "http://localhost:3000",
-      "https://bookmark-manager-dun.vercel.app",
-      "https://bookmark-manager-venkata-ramanas-projects-4e9a24dd.vercel.app",
-      "https://bookmark-manager-rama3na-venkata-ramanas-projects-4e9a24dd.vercel.app"
+      "bookmark-frontend-six.vercel.app",
+    "bookmark-frontend-venkata-ramanas-projects-4e9a24dd.vercel.app"
     ],
     credentials: true,
   })
