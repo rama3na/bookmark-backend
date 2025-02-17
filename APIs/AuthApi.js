@@ -1,13 +1,21 @@
 const exp = require("express");
 const expressAsyncHandler = require("express-async-handler");
-const bcrypt = require("bcryptjs"); // Use bcryptjs instead of bcrypt for compatibility
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const authApp = exp.Router();
 authApp.use(exp.json());
 
-// Ensure JWT_SECRET is set via environment variable
+// Enable trust proxy for reverse proxy setup
+authApp.get('*', (req, res, next) => {
+    req.app.set('trust proxy', 1); // Trust the first proxy
+    next();
+});
+
 const JWT_SECRET = process.env.JWT_SECRET || "4f8fH7tJbC5zL9xK2G7fU6nR1vYdM9f3H6tP7qXwY8bM9tFz4bU5jXq8rS1cVZ7";
+
+// Use crypto fallback for bcrypt in environments without crypto support
+bcrypt.setRandomFallback(require('crypto').randomBytes);
 
 // ✅ User Registration (Signup)
 authApp.post('/register', expressAsyncHandler(async (req, res) => {
@@ -23,13 +31,12 @@ authApp.post('/register', expressAsyncHandler(async (req, res) => {
     }
 
     try {
-        // Check if the user already exists
         const existingUser = await authCollectionObj.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: "User already exists" });
         }
 
-        // Hash the password using bcryptjs
+        // Hash password using bcryptjs
         const salt = bcrypt.genSaltSync(10);
         const hashedPassword = bcrypt.hashSync(password, salt);
 
@@ -58,24 +65,21 @@ authApp.post('/login', expressAsyncHandler(async (req, res) => {
     }
 
     try {
-        // Check if the user exists
         const user = await authCollectionObj.findOne({ email });
         if (!user) {
             return res.status(400).json({ message: "Invalid email or password" });
         }
 
-        // Compare the provided password with the hashed password
         const isValid = await bcrypt.compare(password, user.password);
         if (!isValid) {
             return res.status(400).json({ message: "Invalid email or password" });
         }
 
-        // Generate and send the JWT token
         const token = jwt.sign({ email: user.email }, JWT_SECRET, { expiresIn: "1h" });
 
         res.json({
             message: "Success",
-            token: token,  // Send the token to the client
+            token: token,
             user: { email: user.email }
         });
     } catch (error) {
