@@ -11,8 +11,7 @@ const JWT_SECRET = process.env.JWT_SECRET || "4f8fH7tJbC5zL9xK2G7fU6nR1vYdM9f3H6
 // ✅ User Registration (Signup)
 authApp.post('/register', expressAsyncHandler(async (req, res) => {
     const authCollectionObj = req.app.get("authCollectionObj");
-    
-    // Debugging: Check if collection is initialized
+
     if (!authCollectionObj) {
         console.error("❌ Database collection not initialized!");
         return res.status(500).json({ message: "Database not initialized yet." });
@@ -23,28 +22,26 @@ authApp.post('/register', expressAsyncHandler(async (req, res) => {
         return res.status(400).json({ message: "Email and password are required" });
     }
 
-    const existingUser = await authCollectionObj.findOne({ email });
-    if (existingUser) {
-        return res.status(400).json({ message: "User already exists" });
-    }
-
     try {
-        // Debugging: Log user registration process
-        console.log("Registering user:", email);
-        
-        // 🔹 Hash password using bcrypt
+        const existingUser = await authCollectionObj.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: "User already exists" });
+        }
+
+        // Hash password using bcrypt
         const salt = bcrypt.genSaltSync(10);
         const hashedPassword = bcrypt.hashSync(password, salt);
 
-        await authCollectionObj.insertOne({ email, password: hashedPassword });
-        console.log("✅ User registered successfully:", email);
+        const insertResult = await authCollectionObj.insertOne({ email, password: hashedPassword });
+        console.log("✅ User registered successfully:", insertResult);
 
         res.json({ message: "User registered successfully" });
     } catch (error) {
-        console.error("❌ Error hashing password:", error);
+        console.error("❌ Error during registration:", error);
         return res.status(500).json({ message: "Internal server error" });
     }
 }));
+
 
 // ✅ User Login
 authApp.post('/login', expressAsyncHandler(async (req, res) => {
