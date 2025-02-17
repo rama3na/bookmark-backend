@@ -29,6 +29,9 @@ authApp.post('/register', expressAsyncHandler(async (req, res) => {
     }
 
     try {
+        // Debugging: Log user registration process
+        console.log("Registering user:", email);
+        
         // 🔹 Hash password using bcrypt
         const salt = bcrypt.genSaltSync(10);
         const hashedPassword = bcrypt.hashSync(password, salt);
@@ -74,30 +77,5 @@ authApp.post('/login', expressAsyncHandler(async (req, res) => {
         user: { email: user.email }
     });
 }));
-
-
-authApp.get('/get-user', async (req, res) => {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) {
-        return res.status(403).json({ message: "Access denied. No token provided." });
-    }
-
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        const authCollectionObj = req.app.get("authCollectionObj");
-
-        const user = await authCollectionObj.findOne({ email: decoded.email });
-        if (!user) {
-            return res.status(404).json({ message: "User not found" });
-        }
-
-        res.json({
-            message: "User details retrieved",
-            user: { email: user.email }
-        });
-    } catch (error) {
-        res.status(401).json({ message: "Invalid token" });
-    }
-});
 
 module.exports = authApp;
