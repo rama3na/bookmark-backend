@@ -6,7 +6,7 @@ const jwt = require("jsonwebtoken");
 const authApp = exp.Router();
 authApp.use(exp.json());
 
-const JWT_SECRET = process.env.JWT_SECRET || "default_secret";
+const JWT_SECRET = process.env.JWT_SECRET || "4f8fH7tJbC5zL9xK2G7fU6nR1vYdM9f3H6tP7qXwY8bM9tFz4bU5jXq8rS1cVZ7";
 
 // ✅ User Registration (Signup)
 authApp.post('/register', expressAsyncHandler(async (req, res) => {
